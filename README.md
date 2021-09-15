@@ -6,7 +6,7 @@ Projekat se sastoji od sledecih datoteka:
 **AnnoPI** folder sadrži datoteke potrebne za pokretanje aplikacije:
 -AnnoPI.py - glavni program
 
-Ontologijske datoteke za GO i HPO u slucaju da korisnik  ne preuzima najsvežije verzije:
+Ontologijske datoteke za GO i HPO u slučaju da korisnik  ne preuzima najsvežije verzije:
 -goa_human_gaf.gz (GO)
 -genes_to_phenotypes.txt (HPO)
 
@@ -22,7 +22,7 @@ Datoteke sa trenutno prikupljenim podacima za tooltips:
 -hpo-icon.png
 -cssFile.css
 
-**srb-hwe.vcf** - primer ulazne datoteke
+**srb-hwe.vcf** - primer ulazne .vcf datoteke nad kojom je moguce testirati aplikaciju
 
 --------------------------------------
 
