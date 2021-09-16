@@ -28,8 +28,6 @@ urlHpo = ''#'https://ci.monarchinitiative.org/view/hpo/job/hpo.annotations/lastS
 pathAnnovar = ''
 
 try:
-    #opts, args = getopt.getopt(sys.argv[1:],"h:i:o",['ifile','ofile'])
-	#opts, args = getopt.getopt(sys.argv,'i:o:',['ifile','ofile'])
 	opts, args = getopt.getopt(sys.argv,'g:h:',['go','hpo'])
 	counter = 0
 	for arg in args:
@@ -56,8 +54,11 @@ if (isExist == False):
 	sys.exit(1)
 
 
-outputAnnovar = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
-outputName = outputAnnovar + ".hg19_multianno"
+if pathAnnovar.find(".vcf") != -1:
+    outputAnnovarFile = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
+    outputName = outputAnnovarFile + ".hg19_multianno.txt"
+else:
+    outputName = pathAnnovar
 print('Preparing ontology files. . . ')
 
 filenameGO = "goa_human.gaf.gz"
@@ -78,7 +79,6 @@ if urlHpo != '':
 
 print ('Ontology files have been prepared')
 
-output = open("output.txt", "r+")
 
 start = time.time()
 
@@ -152,7 +152,7 @@ def getGOVersion(filename):
 #parse goa_human.gaf file with GO info
 import time
 import re
-def getGOdata(filename, outputName):
+def getGOdata(filename):
 	print ('------Getting Gene and GO Data-------')
 	#start = time.time()
 	geneGO = {}
@@ -182,7 +182,7 @@ def getGOdata(filename, outputName):
         #print('End collecting current GO functions -> ' + str(len(goTooltips)))
 
 	print('---------Gene and GO Data processing---------')
-	with gzip.open(filename, 'rb') as goaHuman, open("Output GO-Data.txt", "a+") as outputGOsRead, open("Output Gene.txt", "a+") as outputGenesRead, open("GeneJSMap.js", "w+") as geneJS, open("GOtooltipJS.js", "a+") as goTooltipJS:
+	with gzip.open(filename, 'rb') as goaHuman, open("Output GO-Data.txt", "a+") as outputGOsRead, open("Output Gene.txt", "a+") as outputGenesRead, open("GeneJSMap.js", "w+") as geneJS, open("GOtooltipJS.js", "w+") as goTooltipJS:
 		geneJS.write("const geneMap = new Map();\n")
 		goTooltipJS.write("const goMap = new Map();\n")
         
@@ -256,7 +256,7 @@ def getHPOdata(filename):
                 hpoTooltips[hpoOutput] = line[13:-1].replace("\"","")#13+hpoEnd]
         #print('End collecting current HPO phenotypes -> ' + str(len(hpoTooltips)))
     
-    with open(filename, "r") as allHpo, open("Output HPO-Data.txt", "a+") as outputHPOsRead, open("HPOtooltipJS.js", "a+") as hpoJS:
+    with open(filename, "r") as allHpo, open("Output HPO-Data.txt", "a+") as outputHPOsRead, open("HPOtooltipJS.js", "w+") as hpoJS:
         hpoJS.write("const hpoMap = new Map();\n")
         for line in allHpo:
 
@@ -332,11 +332,11 @@ def getVariationsData(fileName):
 
 
 
-def createOutput(fileName, outputName, goFile = "goa_human.gaf.gz", hpoFile = "genes_to_phenotype.txt"):
+def createOutput(fileName, goFile = "goa_human.gaf.gz", hpoFile = "genes_to_phenotype.txt"):
     
-	geneGO, genes = getGOdata(goFile, outputName)
+	geneGO, genes = getGOdata(goFile)
 	geneHpo, genesHPO = getHPOdata(hpoFile)
-	variations = getVariationsData(fileName + ".txt")
+	variations = getVariationsData(outputName)
 	#print ("Variations: " + str(len(variations.keys())))
     
 	outputGenes = []
@@ -351,22 +351,22 @@ def createOutput(fileName, outputName, goFile = "goa_human.gaf.gz", hpoFile = "g
     
 	outputHtml.write("<!DOCTYPE html>\n")
 	outputHtml.write("<html><body><head>")
-	outputHtml.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script>")
+	outputHtml.write("<script src=\"js/jquery.3.4.1.min.js\"></script>")
     
     #datatable
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js\"></script>\n")
-	outputHtml.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css\">\n")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/jquery.dataTables.js\"></script>\n")
+	outputHtml.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"css/jquery.dataTables.css\">\n")
     
     #checkbox
-	outputHtml.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css\">")
-	outputHtml.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css\">")
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js\"></script>")
+	outputHtml.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"css/select.dataTables.min.css\">")
+	outputHtml.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"css/buttons.dataTables.min.css\">")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/dataTables.select.min.js\"></script>")
     
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js\"></script>")
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\js/buttons.flash.min.js\"></script>")
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\js/buttons.html5.min.js\"></script>")
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js\"></script>")
-	outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"js/input.js\"></script>")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/dataTables.buttons.min.js\"></script>")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/buttons.flash.min.js\"></script>")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/buttons.html5.min.js\"></script>")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/jszip.min.js\"></script>")
+	outputHtml.write("<script type=\"text/javascript\" src=\"js/input.js\"></script>")
 	#outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js\"></script>")
 	#outputHtml.write("<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js\"></script>")
   
@@ -374,8 +374,8 @@ def createOutput(fileName, outputName, goFile = "goa_human.gaf.gz", hpoFile = "g
 	#outputHtml.write("<script src=\"https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js\"></script>")
 	#outputHtml.write("<script src=\"https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js\"></script>")
 
-	outputHtml.write("<link rel=\"stylesheet\" href=\"cssFile.css\">")
-	outputHtml.write("<script src='scriptFile.js'></script></head>")
+	outputHtml.write("<link rel=\"stylesheet\" href=\"css/cssFile.css\">")
+	outputHtml.write("<script src='js/scriptFile.js'></script></head>")
 	outputHtml.write("")
 	outputHtml.write("<div style=\"text-align:center\"><span id=\"headingTop\" style=\"font-size:26px;\">Function and phenotype terms associated with human exonic variations</span><br />")
 	outputHtml.write("<span id = \"goHpoVersion\" style=\"font-size:18px\">GO version: " + getGOVersion(goFile) +". <br /> HPO version: #1271 Mar 27, 2020</span></div>")
@@ -502,36 +502,23 @@ def createOutput(fileName, outputName, goFile = "goa_human.gaf.gz", hpoFile = "g
 import os, string
 import subprocess
 
-print("Calling annovar")
+def getAnnovarData(pathAnnovar):
 
-#my_cmd = "perl table_annovar.pl example/ex1.avinput humandb/ -buildver hg19 -out myanno -remove -protocol refGene,cytoBand,dbnsfp30a -operation g,r,f -nastring . -csvout -polish -xreffile example/gene_fullxref.txt"
-#my_cmd = "perl table_annovar.pl mom/mom.vcf humandb/ -buildver hg19 -out mom -remove -protocol refGene -operation g -nastring . -vcfinput -polish
+    print("Calling annovar")
 
-#my_cmd = "perl table_annovar.pl example/ex1.avinput humandb/ -buildver hg19 -out myanno -remove -protocol refGene,cytoBand,dbnsfp30a -operation g,r,f -nastring . -csvout -polish -xreffile example/gene_fullxref.txt"
-#my_cmd = "perl table_annovar.pl mom/mom.vcf humandb/ -buildver hg19 -out mom -remove -protocol refGene -operation g -nastring . -vcfinput -polish
+    outputAnnovar = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
+    pipe = subprocess.Popen(["perl", "table_annovar.pl" , pathAnnovar, "humandb/", "-buildver", "hg19", "-out", outputAnnovar, "-remove", "-protocol", "refGene", "-operation", "g", "-nastring", ".", "-vcfinput", "-polish"], stdout=subprocess.PIPE)
 
-#my_cmd_output = os.popen(my_cmd)
+    (output, err) = pipe.communicate()
+    p_status = pipe.wait()
 
-pipe = subprocess.Popen(["perl", "table_annovar.pl" , pathAnnovar, "humandb/", "-buildver", "hg19", "-out", outputAnnovar, "-remove", "-protocol", "refGene", "-operation", "g", "-nastring", ".", "-vcfinput", "-polish"], stdout=subprocess.PIPE)
+    print ("Annovar has been finished")
 
-(output, err) = pipe.communicate()
-p_status = pipe.wait()
+if pathAnnovar.find(".vcf") != -1:
+    getAnnovarData(pathAnnovar)
+    
 
-print ("Annovar has been finished")
-
-
-# In[19]:
-
-
-#createOutput("momAll.txt")
-#createOutput("dadAll.txt")
-#createOutput("sonAll.txt")
-#createOutput(nameSon + ".hg19_multianno.txt")
-#createOutput(nameDad + ".hg19_multianno.txt")
-#createOutput("son" + ".hg19_multianno.txt", "son")
-#createOutput("dad" + ".hg19_multianno.txt", "dad")
-
-createOutput(outputName, outputName)
+createOutput(outputName)
 #createOutput("dad" + ".hg19_multianno.txt")
 
 
