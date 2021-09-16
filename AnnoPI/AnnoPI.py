@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 import time
 import urllib.request
 from urllib.request import urlopen
@@ -19,16 +16,13 @@ import os
 
 little = -1
 
-urlGo = ''#'http://current.geneontology.org/annotations/goa_human.gaf.gz'
-#urlGo = 'http://ftp.ebi.ac.uk/pub/databases/GO/goa/HUMAN/goa_human.gaf.gz'
-#urlHpo = 'http://compbio.charite.de/jenkins/job/hpo.annotations/lastBuild/artifact/util/annotation/genes_to_phenotype.txt'
-#urlHpo = 'http://compbio.charite.de/jenkins/job/hpo.annotations.monthly/lastSuccessfulBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_genes_to_phenotype.txt'
-urlHpo = ''#'https://ci.monarchinitiative.org/view/hpo/job/hpo.annotations/lastSuccessfulBuild/artifact/rare-diseases/util/annotation/genes_to_phenotype.txt'
+urlGo = '' #'http://current.geneontology.org/annotations/goa_human.gaf.gz'
+urlHpo = '' #'https://ci.monarchinitiative.org/view/hpo/job/hpo.annotations/lastSuccessfulBuild/artifact/rare-diseases/util/annotation/genes_to_phenotype.txt'
 
 pathAnnovar = ''
 
 try:
-	opts, args = getopt.getopt(sys.argv,'g:h:',['go','hpo'])
+	opts, args = getopt.getopt(sys.argv,'g:h:d:',['go','hpo','vcfInputFileName'])
 	counter = 0
 	for arg in args:
 		if arg in ("-g", "--go"):
@@ -38,8 +32,6 @@ try:
 		elif arg in ("-d", "--vcfInputFileName"):
 			pathAnnovar = args[counter+1]
 		counter = counter+1
-        #elif opt in ("-s", "--short"):
-            #little = arg
 except getopt.GetoptError:
 	print ('some mistake')
 	sys.exit(2)
@@ -54,11 +46,11 @@ if (isExist == False):
 	sys.exit(1)
 
 
-if pathAnnovar.find(".vcf") != -1:
-    outputAnnovarFile = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
-    outputName = outputAnnovarFile + ".hg19_multianno.txt"
+outputAnnovarFile = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
+if outputAnnovarFile.find(".vcf") != -1:
+	outputName = outputAnnovarFile + ".hg19_multianno.txt"
 else:
-    outputName = pathAnnovar
+	outputName = pathAnnovar
 print('Preparing ontology files. . . ')
 
 filenameGO = "goa_human.gaf.gz"
@@ -79,6 +71,7 @@ if urlHpo != '':
 
 print ('Ontology files have been prepared')
 
+output = open("output.txt", "r+")
 
 start = time.time()
 
@@ -120,9 +113,6 @@ def extractGeneInfo(geneId):
     
     if checkConnection(urlGene):
         data = urlopen(urlGene).read().decode('utf-8')
-        #json_data = json.loads(data)
-        
-        #print (data)
         geneDescriptionStart = data.find("RecName: Full") + len("RecName: Full") + 1
         geneDescriptionEnd = data.find(";", geneDescriptionStart)
         geneDes = data[geneDescriptionStart:geneDescriptionEnd]
@@ -153,7 +143,7 @@ def getGOVersion(filename):
 import time
 import re
 def getGOdata(filename):
-	print ('------Getting Gene and GO Data-------')
+	#print ('Getting Gene and GO Data. . .')
 	#start = time.time()
 	geneGO = {}
 	goTooltips = {}
@@ -181,7 +171,7 @@ def getGOdata(filename):
 				goTooltips[goOutput] = line[13:-1]#13+goEnd]
         #print('End collecting current GO functions -> ' + str(len(goTooltips)))
 
-	print('---------Gene and GO Data processing---------')
+	print('Gene and GO Data processing. . .')
 	with gzip.open(filename, 'rb') as goaHuman, open("Output GO-Data.txt", "a+") as outputGOsRead, open("Output Gene.txt", "a+") as outputGenesRead, open("GeneJSMap.js", "w+") as geneJS, open("GOtooltipJS.js", "w+") as goTooltipJS:
 		geneJS.write("const geneMap = new Map();\n")
 		goTooltipJS.write("const goMap = new Map();\n")
@@ -210,7 +200,6 @@ def getGOdata(filename):
 					current = [currentGeneInfo[0] for currentGeneInfo in geneGO[gene]]
 					if go not in current:
 						geneGO[gene].append((go, function, geneId))
-                    #geneGO[gene].append((go, functionWhole))
 				else:
 					geneGO[gene] = [(go, function, geneId)]
                     
@@ -227,31 +216,23 @@ def getGOdata(filename):
 					goTooltipsProcessed.append(go)
 					goTooltipJS.write("goMap.set(\""+ go + "\",\"" + function + "\");\n" )
 
-    #print ("goa_human.gaf data: " + str(len(geneGO.keys())))
-    #print ("Gene information: " + str(len(geneInfo.keys())))
-	print('--------Gene and GO Data have been collected---------')
-    #end = time.time() - start
-    #print (str (round(end, 2)))
+	print('Gene and GO Data have been collected')
 	return geneGO, geneInfo
 
 
 #parse file with HPO info
 def getHPOdata(filename):
     #phenotypes
-    print ('---------HPO Data processing---------')
+    print ('HPO Data processing. . .')
     geneHpo = {}
     hpoTooltips = {}
     hpoGeneId = {}
-    counter = 0
-    counter1 = 0
-    counter2 = 0
     hpoProcessed = []
 
     #print('Start collecting current HPO phenotypes')
     with open("Output HPO-Data.txt", "r+") as outputHPOsRead:
         for line in outputHPOsRead:
             hpoOutput = line[:10].strip()
-            #hpoEnd = line[13:].find("|")
             if hpoOutput not in hpoTooltips:
                 hpoTooltips[hpoOutput] = line[13:-1].replace("\"","")#13+hpoEnd]
         #print('End collecting current HPO phenotypes -> ' + str(len(hpoTooltips)))
@@ -268,7 +249,7 @@ def getHPOdata(filename):
             hpo = info[2]
             geneIdHPO = info[0]
             
-            phenotype = "p"#extractHPOInfo(hpo)
+            phenotype = "p"
             if hpo in hpoTooltips:
                 phenotype = hpoTooltips[hpo]
             else:
@@ -291,19 +272,18 @@ def getHPOdata(filename):
                 hpoProcessed.append(hpo)
                 hpoJS.write("hpoMap.set(\""+ hpo + "\",\"" + phenotype + "\");\n")
 
-    print('---------HPO Data has been collected-----------')
+    print('HPO Data has been collected')
     return geneHpo, hpoGeneId
 
 
 #parse info from annotation file
 def getVariationsData(fileName):
     
-    print ("---------Variations data processing---------")
+    print ("Variations data processing. . .")
     variations = {}
     allExonicGenes = ''
     geneInfo = {}
 
-    #annovarGenes = open("annovarGenes.txt", "w+")
     count = 0
     
     with open(fileName, 'r') as varFile:
@@ -327,7 +307,7 @@ def getVariationsData(fileName):
                     variations[currentGene] = [(startVar, endVar, ref, alt, exonicFunc, chro)] #geneDetail, exonicFunc)]
 
     #annovarGenes.write(" ".join(str(g) for g in variations.keys()))
-    print("---------Variations data has been collected--------- " + str(len(variations.keys())))
+    print("Variations data has been collected" + str(len(variations.keys())))
     return variations
 
 
@@ -336,7 +316,7 @@ def createOutput(fileName, goFile = "goa_human.gaf.gz", hpoFile = "genes_to_phen
     
 	geneGO, genes = getGOdata(goFile)
 	geneHpo, genesHPO = getHPOdata(hpoFile)
-	variations = getVariationsData(outputName)
+	variations = getVariationsData(fileName)
 	#print ("Variations: " + str(len(variations.keys())))
     
 	outputGenes = []
@@ -346,7 +326,7 @@ def createOutput(fileName, goFile = "goa_human.gaf.gz", hpoFile = "genes_to_phen
 	counterHpo = 0
 	counterGene = 0
     
-	outputFileName = fileName[:fileName.find('.')] + ".html"
+	outputFileName = fileName[fileName.rfind("/")+1:fileName.find('.')] + ".html"
 	outputHtml = open(outputFileName, "w+")
     
 	outputHtml.write("<!DOCTYPE html>\n")
@@ -429,9 +409,6 @@ def createOutput(fileName, goFile = "goa_human.gaf.gz", hpoFile = "genes_to_phen
                 
 				if currentGene in geneGO:
 					values = geneGO[currentGene]
-                    #for g in values:
-                        #if g not in outputGos:
-                            #outputGos.append(g)
                             
 					currentGeneGo = len(values)
                    
@@ -448,81 +425,56 @@ def createOutput(fileName, goFile = "goa_human.gaf.gz", hpoFile = "genes_to_phen
                         
 					geneId = str(values[0][2])
 					geneIdHpo = genesHPO[currentGene] if currentGene in genesHPO else ""
-					allGoColumn = "</td><td><a href=\"https://www.ebi.ac.uk/QuickGO/annotations?geneProductId=" + geneId + "\" target=\"_blank\"><img src=\"go-icon.png\"></a></td>"
-										
-				#else:
-					#noGo.write(" " + currentGene)
+					allGoColumn = "</td><td><a href=\"https://www.ebi.ac.uk/QuickGO/annotations?geneProductId=" + geneId + "\" target=\"_blank\"><img src=\"go-icon.png\"></a></td>"	
                             
 				outputHtml.write("</td><td>")
 
 				if currentGene in geneHpo:
 					values = geneHpo[currentGene]
-                    #for v in values:
-                        #if v not in outputHpos:
-                            #outputHpos.append(v)
                                     
 					currentGeneHpo = len(values)
-                    #counterHpo = counterHpo + currentGeneHpo
+
 					if currentGeneHpo > 10:
-                        #outputHtml.write(" ".join(str(startURLhpo + e[0] + "\" data-tippy-content=\""+ e[1] + "\" target=\"_blank\">" + e[0] + "<br/>" + aTagClosed)  for e in geneHpo[currentGene][:10]))# + " ")
-                        #outputHtml.write(" ".join(str(startURLhpo + e[0] + "\" data-tippy-content=\""+ e[1] + "\" target=\"_blank\" style=\"display:none\" class=\"noshow\">" + e[0] + "<br/> " +aTagClosed)  for e in geneHpo[currentGene][10:]) + " ") #GO
-                        #outputHtml.write(" ".join(str(startURLhpo + e +"\" target=\"_blank\" style=\"display:none\">" + e + "<br /> " +aTagClosed) for e in geneHpo[currentGene][5:]))
                         
                         #no tooltip
 						outputHtml.write(" ".join(str(startURLhpo + e[0] + "\" target=\"_blank\">" + e[0] + "<br/>" + aTagClosed)  for e in geneHpo[currentGene][:10]))# + " ")
 						outputHtml.write(" ".join(str(startURLhpo + e[0] + "\" target=\"_blank\" style=\"display:none\" class=\"noshow\">" + e[0] + "<br/> " +aTagClosed)  for e in geneHpo[currentGene][10:]) + " ") #GO
                     
 					elif currentGeneHpo >=1:
-                        #outputHtml.write(" <br/>".join(str(startURLhpo + e[0] + "\" data-tippy-content=\"" + e[1] + "\" target=\"_blank\">" + e[0] + aTagClosed)  for e in geneHpo[currentGene]) + " ") #GO
                         
                         #no tooltip
 						outputHtml.write(" <br/>".join(str(startURLhpo + e[0] + "\" target=\"_blank\">" + e[0] + aTagClosed)  for e in geneHpo[currentGene]) + " ") #GO
                         
-                #outputHtml.write("</td><td><a href=\"https://www.ebi.ac.uk/QuickGO/annotations?geneProductId=" + geneGO[currentGene][0][2] if currentGene in geneGO else "" + "\" target=\"_blank\"><img src=\"go-icon.png\" style=\"width:50px; height:50px\"></a></td><td><a href=\"https://hpo.jax.org/app/browse/gene/"+  +"\" target=\"_blank\"><img src=\"hpo-icon.png\" style=\"width:50px; height:50px\"></a></td></tr>\n")
 					allHpoColumn = "<td><a href=\"https://hpo.jax.org/app/browse/gene/"+ geneIdHpo + "\" target=\"_blank\"><img src=\"hpo-icon.png\"></a></td></tr>\n"
 				
 				outputHtml.write(allGoColumn)
 				outputHtml.write(allHpoColumn)
-                #counter = counter + 1
+
 	endOfTable = "<tfoot><tr><th>Chr</th><th>Start</th><th>End</th><th>Ref</th><th>Alt</th><th>Exonic function</th><th>Gene</th><th>GO associations</th><th>HPO annotations</th><th>All GO</th><th>All HPO</th></tr></tfoot></table>"
 	outputHtml.write("</tbody>")
 	outputHtml.write(endOfTable)
 	outputHtml.write("</body><script src=\'GeneJSMap.js\'></script><script src=\'GOtooltipJS.js\'></script><script src=\'HPOtooltipJS.js\'></script></html>")
-    #print ("Different genes: " +str(len(outputGenes)))
-    #print ("All genes: " + str(counter))
-    #print ("Different GO functions: " + str(len(outputGos)))
-    #print ("All GO functions: " + str(counterGo))
-    #print ("Different HPO functions: " + str(len(outputHpos)))
-    #print ("All HPO functions: " + str(counterHpo))
-
-
-# In[18]:
 
 
 import os, string
 import subprocess
 
 def getAnnovarData(pathAnnovar):
+	print("Calling annovar. . .")
+	
+	outputAnnovar = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
 
-    print("Calling annovar")
+	pipe = subprocess.Popen(["perl", "table_annovar.pl" , pathAnnovar, "humandb/", "-buildver", "hg19", "-out", outputAnnovar, "-remove", "-protocol", "refGene", "-operation", "g", "-nastring", ".", "-vcfinput", "-polish"], stdout=subprocess.PIPE)
 
-    outputAnnovar = pathAnnovar[pathAnnovar.rfind("/")+1:pathAnnovar.rfind(".vcf")]
-    pipe = subprocess.Popen(["perl", "table_annovar.pl" , pathAnnovar, "humandb/", "-buildver", "hg19", "-out", outputAnnovar, "-remove", "-protocol", "refGene", "-operation", "g", "-nastring", ".", "-vcfinput", "-polish"], stdout=subprocess.PIPE)
+	(output, err) = pipe.communicate()
+	p_status = pipe.wait()
 
-    (output, err) = pipe.communicate()
-    p_status = pipe.wait()
-
-    print ("Annovar has been finished")
+	print ("Annovar has been finished. . .")
 
 if pathAnnovar.find(".vcf") != -1:
-    getAnnovarData(pathAnnovar)
-    
+	getAnnovarData(pathAnnovar)
 
 createOutput(outputName)
-#createOutput("dad" + ".hg19_multianno.txt")
-
-
-# In[20]:
 
 
 duration = round(time.time() - start, 2)
