@@ -18,6 +18,8 @@ Datoteke sa trenutno prikupljenim podacima za tooltips:
 -Folder *js* koji sadrži neophodne JavaScript biblioteke
 -scriptFile.js - datoteka koja omogućava selekciju, izvoz, sortiranje, pretragu
 
+-Folder *css* koji sadrzi datoteke za css podrsku
+
 -go-icon.png
 -hpo-icon.png
 -cssFile.css
