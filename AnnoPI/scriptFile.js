@@ -59,7 +59,7 @@ var table = $('#annotationTable').DataTable({
                                 },
 								format: {
 									body: function ( data, row, column, node ) {
-										return column == 9 || column == 10 ? node.getElementsByTagName("a") != undefined && node.getElementsByTagName("a")[0].href : (column == 7 || column == 8 ? node.textContent.replace("<br />", " ") : node.textContent);
+										return column == 9 || column == 10 ? (node.getElementsByTagName("a")[0] != undefined ? node.getElementsByTagName("a")[0].href : ""): (column == 7 || column == 8 ? node.textContent.replace("<br />", " ") : node.textContent);
 									}
 								}
                             },
