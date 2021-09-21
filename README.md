@@ -3,9 +3,12 @@ Dodatak za softver Annovar
 
 Projekat se sastoji od sledecih datoteka:
 
-**AnnoPI** folder sadrži datoteke potrebne za pokretanje aplikacije:
+--------------------------------------------------------------------
+**AnnoPI** folder koji sadrži datoteke potrebne za pokretanje aplikacije:
+--------------------------------------------------------------------
 -AnnoPI.py - glavni program
 
+**data** folder koji sadrzi:
 Ontologijske datoteke za GO i HPO u slučaju da korisnik  ne preuzima najsvežije verzije:
 -goa_human_gaf.gz (GO)
 -genes_to_phenotypes.txt (HPO)
@@ -15,18 +18,16 @@ Datoteke sa trenutno prikupljenim podacima za tooltips:
 -Output GO-Data.txt
 -Output HPO-Data.txt 
 
--Folder *js* koji sadrži neophodne JavaScript biblioteke
--scriptFile.js - datoteka koja omogućava selekciju, izvoz, sortiranje, pretragu
+**js** folder koji sadrži neophodne JavaScript biblioteke kao i  scriptFile.js - datoteku koja omogućava selekciju, izvoz, sortiranje, pretragu
 
--Folder *css* koji sadrzi datoteke za css podrsku
+**css** folder koji sadrzi datoteke za css podrsku
+**images** folder sa ikonicama
 
--go-icon.png
--hpo-icon.png
--cssFile.css
 
+--------------------------------------------------------------------------------------
 **srb-hwe.vcf** - primer ulazne .vcf datoteke nad kojom je moguce testirati aplikaciju
+---------------------------------------------------------------------------------------
 
---------------------------------------
 
 AnnoPI je program napisan u Python-u. Primer pokretanja programa je:
 python AnnoPI.py -g goUrl -h hpoUrl -d vcfInputFilename
