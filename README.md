@@ -1,5 +1,5 @@
 # AnnoPI
-Dodatak za softver Annovar
+Dodatak za softver Annovar koji na osnovu ulazne .vcf datoteke generise .html datoteku koja pregledno prikazuje podatke iz Annovar-a obogacene dodatnim informacijama kao sto su funkcija i fenotip gena.
 
 Projekat se sastoji od sledecih datoteka:
 
@@ -21,6 +21,7 @@ Datoteke sa trenutno prikupljenim podacima za tooltips:
 **js** folder koji sadrži neophodne JavaScript biblioteke kao i  scriptFile.js - datoteku koja omogućava selekciju, izvoz, sortiranje, pretragu
 
 **css** folder koji sadrzi datoteke za css podrsku
+
 **images** folder sa ikonicama
 
 
