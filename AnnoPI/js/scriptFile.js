@@ -153,7 +153,7 @@ var table = $('#annotationTable').DataTable({
 
 
 		//setting tooltips
-		$("td:has(span)").each( function (i, value) {
+		$("td:has(span)", table.rows().nodes()).each( function (i, value) {
 			if (geneMap.has(value.textContent))
 			{
 				$("span", this).attr('title', geneMap.get(value.textContent).toString());
