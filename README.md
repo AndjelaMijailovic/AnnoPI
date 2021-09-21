@@ -35,3 +35,5 @@ gde su -g i -h opcioni parametri koje korisnik zadaje u nameri da preuzme najnov
 ukoliko ih ne navede, program koristi lokalne verzije datoteka
 
 vcfInputFileName argument predstavlja putanju do .vcf datoteke koja predstavlja ulazni podatak za Annovar
+
+Za ispravno pokretanje programa neophodno je da korisnik ima instaliran Perl i Python interpreter
